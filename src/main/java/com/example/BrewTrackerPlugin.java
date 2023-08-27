@@ -1,80 +1,96 @@
-package com.brewTracker;
+package com.example;
 
 import com.google.inject.Provides;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
-import net.runelite.api.GameState;
-import net.runelite.api.events.GameStateChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.api.events.MenuOptionClicked;
+import net.runelite.client.ui.overlay.OverlayManager;
 
-@Slf4j
 @PluginDescriptor(
-	name = "Sara Brew Tracker",
+	name = "Brew Tracker",
 	description = "Tracks the number of Sara brew sips",
 	tags = {"sara", "brew", "tracker"}
 )
-public class BrewTracker extends Plugin
+public class BrewTrackerPlugin extends Plugin
 {
 
 	@Inject
-	private Client client;
+	public Client client;
 
 	@Inject
-	private ExampleConfig config;
+	public BrewTracker config;
+
+	@Inject
+	public BrewTrackerOverlay brewTrackerOverlay;
+	@Inject
+	public OverlayManager overlayManager;
+
+
+	//Initial sip counter
+	public int brewCounter = 0;
+	public int restoreCounter = 0;
 
 	@Override
 	protected void startUp() throws Exception
 	{
-		log.info("Example started!");
+		overlayManager.add(brewTrackerOverlay);
+		brewCounter = 0;
+		restoreCounter = 0;
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
-		log.info("Example stopped!");
+		overlayManager.remove(brewTrackerOverlay);
+	}
+
+	public int getBrewCounter()
+	{
+		return brewCounter;
+	}
+
+	public int getRestoreCounter()
+	{
+		return restoreCounter;
 	}
 
 	@Subscribe
-	public void onGameStateChanged(GameStateChanged gameStateChanged)
-	{
-		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
-		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.greeting(), null);
+	public void onMenuOptionClicked(MenuOptionClicked event) {
+		if (event.getMenuOption().equals("Drink") && event.getMenuTarget().contains("Saradomin brew")) {
+			brewCounter++;
 		}
-	}
-
-	@PluginDescriptor(
-			name = "Sara Brew Tracker",
-			description = "Tracks the number of Sara brew sips",
-			tags = {"sara", "brew", "tracker"}
-	)
-
-	public class SaraBrewTrackerPlugin extends Plugin  {
-		private int sipCount = 0;
-
-		@Override
-		public void startUp() {
-			sipCount = 0;
-		}
-
-		@Subscribe
-		public void onMenuOptionClicked(MenuOptionClicked event) {
-			if (event.getMenuOption().equals("Drink") && event.getMenuTarget().contains("Saradomin brew")) {
-				sipCount++;
-				// You can also add a notification or some other action here.
+		if (event.getMenuOption().equals("Drink") && event.getMenuTarget().contains("Super restore")) {
+			restoreCounter++;
+			brewCounter -= 3; // Reset 3 sips of Saradomin brews for each sip of Super restore
+			if (brewCounter < 0) {
+				brewCounter = 0;
 			}
 		}
+		int requiredRestores = (int) Math.floor((double) brewCounter / 3.0);
 	}
 
+//	public void onMenuOptionClicked(MenuOptionClicked event) {
+//		if (event.getMenuOption().equals("Drink") && event.getMenuTarget().contains("Saradomin brew")) {
+//			sipCount++;
+//		}
+//		if (event.getMenuOption().equals("Drink") && event.getMenuTarget().contains("Super restore")) {
+//			restoreCount++;
+//			sipCount -= 3; // Reset 3 sips of Saradomin brews for each sip of Super restore
+//			if (sipCount < 0) {
+//				sipCount = 0;
+//			}
+//		}
+//		int requiredRestores = (int) Math.floor((double) sipCount / 3.0);
+//		// Display `requiredRestores` on the screen as the restore amount.
+//	}
+
 	@Provides
-	ExampleConfig provideConfig(ConfigManager configManager)
+	BrewTracker provideConfig(ConfigManager configManager)
 	{
-		return configManager.getConfig(ExampleConfig.class);
+		return configManager.getConfig(BrewTracker.class);
 	}
 }
