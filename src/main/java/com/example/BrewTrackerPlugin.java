@@ -60,10 +60,10 @@ public class BrewTrackerPlugin extends Plugin
 
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event) {
-		if (event.getMenuOption().equals("Drink") && event.getMenuTarget().contains("Saradomin brew")) {
+		if (event.getMenuOption().equals("Drink") && event.getMenuTarget().contains("Saradomin brew") || event.getMenuTarget().contains("Nectar")) {
 			brewCounter++;
 		}
-		if (event.getMenuOption().equals("Drink") && event.getMenuTarget().contains("Super restore")) {
+		if (event.getMenuOption().equals("Drink") && event.getMenuTarget().contains("Super restore") || event.getMenuTarget().contains("Tears of elidinis")) {
 			restoreCounter++;
 			brewCounter -= 3; // Reset 3 sips of Saradomin brews for each sip of Super restore
 			if (brewCounter < 0) {

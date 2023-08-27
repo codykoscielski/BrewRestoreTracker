@@ -13,13 +13,13 @@ import javax.imageio.ImageIO;
 public class BrewTrackerOverlay extends Overlay {
 
     public final BrewTrackerPlugin plugin;
-    private Image saraBrewImage;
+    private Image restoreImage;
 
     @Inject
     public BrewTrackerOverlay(BrewTrackerPlugin plugin) {
         this.plugin = plugin;
         try {
-            saraBrewImage = ImageIO.read(getClass().getResourceAsStream("/brew.png"));
+            restoreImage = ImageIO.read(getClass().getResourceAsStream("/restore.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -38,7 +38,7 @@ public class BrewTrackerOverlay extends Overlay {
         Point startPoint = new Point(30, 40);
 
         // Display the brew and restore sip count
-        graphics.drawImage(saraBrewImage, x_position, y_position, null);
+
         String brewText = "Brew Sips: " + brewCount;
         String restoreText = "Sip restore";
 
@@ -47,8 +47,9 @@ public class BrewTrackerOverlay extends Overlay {
 
         if(brewCount >= 3) {
             graphics.setColor(Color.RED);
-            int imageWidth = saraBrewImage.getWidth(null);
-            int imageHeight = saraBrewImage.getHeight(null);
+            int imageWidth = restoreImage.getWidth(null);
+            int imageHeight = restoreImage.getHeight(null);
+            graphics.drawImage(restoreImage, x_position, y_position, null);
             graphics.drawString(restoreText, startPoint.x, startPoint.y + 15);
             graphics.drawRect(x_position, y_position, imageWidth, imageHeight);// 15 pixels below the first line
         }
