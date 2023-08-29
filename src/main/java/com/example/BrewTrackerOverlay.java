@@ -4,12 +4,12 @@ import net.runelite.client.ui.overlay.Overlay;
 import javax.inject.Inject;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Color;
 import java.awt.Image;
 import java.io.IOException;
 import java.util.Objects;
 import javax.imageio.ImageIO;
+import javax.swing.*;
 
 public class BrewTrackerOverlay extends Overlay {
 
@@ -18,11 +18,13 @@ public class BrewTrackerOverlay extends Overlay {
     //Setting the brew image position
     public static final int x_position = 30;
     public static final int y_position = 60;
-
+    private Color currentColor = Color.WHITE;
+    private Timer timer;
 
     @Inject
     public BrewTrackerOverlay(BrewTrackerPlugin plugin) {
         this.plugin = plugin;
+        setColorSwapperTimer();
         try {
             restoreImage = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/restore.png")));
         } catch (IOException e) {
@@ -30,31 +32,34 @@ public class BrewTrackerOverlay extends Overlay {
         }
     }
 
-
     @Override
     public Dimension render(Graphics2D graphics) {
-        // Set the color for the text
-        graphics.setColor(Color.WHITE);
-
-        // todo make text flashing so its more visible
-        if(plugin.brewCounter >= plugin.brewsPerRestore) {
-            drawRectangle(graphics);
+        if (plugin.brewCounter >= plugin.brewsPerRestore) {
+            if (!timer.isRunning()) {
+                timer.start();
+            }
+            graphics.setColor(currentColor);
+            drawRectangleAroundRestore(graphics);
             drawRestoreTextAndImage(graphics);
+        } else {
+            if (timer.isRunning()) {
+                timer.stop();
+            }
+            graphics.setColor(Color.WHITE);
         }
-        drawBrewsText(graphics);
 
-        return null; // Return the appropriate dimension if needed
+        drawBrewsText(graphics);
+        return null;
     }
 
-    private void drawRectangle(Graphics2D graphics) {
+    private void drawRectangleAroundRestore(Graphics2D graphics) {
         int imageWidth = restoreImage.getWidth(null);
         int imageHeight = restoreImage.getHeight(null);
-        graphics.drawRect(x_position, y_position, imageWidth, imageHeight);// Fifteen pixels below the first line
+        graphics.drawRect(x_position - 3, y_position - 3, imageWidth + 6, imageHeight + 6);
     }
 
     private void drawRestoreTextAndImage(Graphics2D graphics) {
         String restoreText = "Sip restore";
-        graphics.setColor(Color.RED);
         graphics.drawImage(restoreImage, x_position, y_position, null);
         graphics.drawString(restoreText, x_position, 55);
     }
@@ -62,5 +67,15 @@ public class BrewTrackerOverlay extends Overlay {
     private void drawBrewsText(Graphics2D graphics) {
         String brewText = "Brew Sips: " + plugin.brewCounter;
         graphics.drawString(brewText, x_position, 40);
+    }
+
+    private void setColorSwapperTimer() {
+        timer = new Timer(500, e -> {
+            if (currentColor.equals(Color.WHITE)) {
+                currentColor = Color.RED;
+            } else {
+                currentColor = Color.WHITE;
+            }
+        });
     }
 }
