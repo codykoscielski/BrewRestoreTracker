@@ -1,6 +1,9 @@
 package com.example;
 
 import net.runelite.client.ui.overlay.Overlay;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.inject.Inject;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -20,6 +23,7 @@ public class BrewTrackerOverlay extends Overlay {
     public static final int y_position = 60;
     private Color currentColor = Color.WHITE;
     private Timer timer;
+    private static final Logger logger = LoggerFactory.getLogger(BrewTrackerOverlay.class);
 
     @Inject
     public BrewTrackerOverlay(BrewTrackerPlugin plugin) {
@@ -28,7 +32,7 @@ public class BrewTrackerOverlay extends Overlay {
         try {
             restoreImage = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/restore.png")));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Failed to load image", e);
         }
     }
 

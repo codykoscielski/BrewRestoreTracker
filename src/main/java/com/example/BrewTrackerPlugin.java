@@ -26,8 +26,9 @@ public class BrewTrackerPlugin extends Plugin
 	public int brewCounter = 0;
 	// todo implement restores-till-0 functionality
 //	public int restoreCounter = 0;
-
-	public int brewsPerRestore = 3;
+	public final int brewsPerRestore = 3;
+	private long lastActionTime = 0;
+	private static final long GAME_TICK = 1600;
 
 	@Override
 	protected void startUp()
@@ -43,12 +44,15 @@ public class BrewTrackerPlugin extends Plugin
 
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event) {
-		// todo confirm user actually drank the item and not just spam clicked it
-		if (drankBrewOrNectar(event)) {
-			drinkBrew();
-		}
-		if (drankRestoreOrTears(event)) {
-			drinkRestore();
+		long currentTime = System.currentTimeMillis();
+		if (currentTime - lastActionTime > GAME_TICK) {
+			if (drankBrewOrNectar(event)) {
+				drinkBrew();
+			}
+			if (drankRestoreOrTears(event)) {
+				drinkRestore();
+			}
+			lastActionTime = currentTime;
 		}
 	}
 
