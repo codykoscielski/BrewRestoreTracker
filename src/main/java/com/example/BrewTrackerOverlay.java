@@ -8,18 +8,23 @@ import java.awt.Point;
 import java.awt.Color;
 import java.awt.Image;
 import java.io.IOException;
+import java.util.Objects;
 import javax.imageio.ImageIO;
 
 public class BrewTrackerOverlay extends Overlay {
 
     public final BrewTrackerPlugin plugin;
     private Image restoreImage;
+    //Setting the brew image position
+    public static final int x_position = 30;
+    public static final int y_position = 60;
+
 
     @Inject
     public BrewTrackerOverlay(BrewTrackerPlugin plugin) {
         this.plugin = plugin;
         try {
-            restoreImage = ImageIO.read(getClass().getResourceAsStream("/restore.png"));
+            restoreImage = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/restore.png")));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -28,34 +33,34 @@ public class BrewTrackerOverlay extends Overlay {
 
     @Override
     public Dimension render(Graphics2D graphics) {
-        int brewCount = plugin.getBrewCounter();
-
-        //Setting the brew image position
-        int x_position = 30;
-        int y_position = 60;
-
-        // Draw the text on the overlay
-        Point startPoint = new Point(30, 40);
-
-        // Display the brew and restore sip count
-
-        String brewText = "Brew Sips: " + brewCount;
-        String restoreText = "Sip restore";
-
         // Set the color for the text
         graphics.setColor(Color.WHITE);
 
-        if(brewCount >= 3) {
-            graphics.setColor(Color.RED);
-            int imageWidth = restoreImage.getWidth(null);
-            int imageHeight = restoreImage.getHeight(null);
-            graphics.drawImage(restoreImage, x_position, y_position, null);
-            graphics.drawString(restoreText, startPoint.x, startPoint.y + 15);
-            graphics.drawRect(x_position, y_position, imageWidth, imageHeight);// 15 pixels below the first line
+        // todo make text flashing so its more visible
+        if(plugin.brewCounter >= plugin.brewsPerRestore) {
+            drawRectangle(graphics);
+            drawRestoreTextAndImage(graphics);
         }
-
-        graphics.drawString(brewText, startPoint.x, startPoint.y);
+        drawBrewsText(graphics);
 
         return null; // Return the appropriate dimension if needed
+    }
+
+    private void drawRectangle(Graphics2D graphics) {
+        int imageWidth = restoreImage.getWidth(null);
+        int imageHeight = restoreImage.getHeight(null);
+        graphics.drawRect(x_position, y_position, imageWidth, imageHeight);// Fifteen pixels below the first line
+    }
+
+    private void drawRestoreTextAndImage(Graphics2D graphics) {
+        String restoreText = "Sip restore";
+        graphics.setColor(Color.RED);
+        graphics.drawImage(restoreImage, x_position, y_position, null);
+        graphics.drawString(restoreText, x_position, 55);
+    }
+
+    private void drawBrewsText(Graphics2D graphics) {
+        String brewText = "Brew Sips: " + plugin.brewCounter;
+        graphics.drawString(brewText, x_position, 40);
     }
 }

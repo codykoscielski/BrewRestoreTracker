@@ -1,9 +1,7 @@
 package com.example;
 
-import com.google.inject.Provides;
 import javax.inject.Inject;
-import net.runelite.api.Client;
-import net.runelite.client.config.ConfigManager;
+
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -19,78 +17,57 @@ public class BrewTrackerPlugin extends Plugin
 {
 
 	@Inject
-	public Client client;
-
-	@Inject
-	public BrewTracker config;
-
-	@Inject
 	public BrewTrackerOverlay brewTrackerOverlay;
 	@Inject
 	public OverlayManager overlayManager;
 
 
-	//Initial sip counter
+	//Initial sip counters
 	public int brewCounter = 0;
-	public int restoreCounter = 0;
+	// todo implement restores-till-0 functionality
+//	public int restoreCounter = 0;
+
+	public int brewsPerRestore = 3;
 
 	@Override
-	protected void startUp() throws Exception
+	protected void startUp()
 	{
 		overlayManager.add(brewTrackerOverlay);
-		brewCounter = 0;
-		restoreCounter = 0;
 	}
 
 	@Override
-	protected void shutDown() throws Exception
+	protected void shutDown()
 	{
 		overlayManager.remove(brewTrackerOverlay);
 	}
 
-	public int getBrewCounter()
-	{
-		return brewCounter;
-	}
-
-	public int getRestoreCounter()
-	{
-		return restoreCounter;
-	}
-
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event) {
-		if (event.getMenuOption().equals("Drink") && event.getMenuTarget().contains("Saradomin brew") || event.getMenuTarget().contains("Nectar")) {
-			brewCounter++;
+		// todo confirm user actually drank the item and not just spam clicked it
+		if (drankBrewOrNectar(event)) {
+			drinkBrew();
 		}
-		if (event.getMenuOption().equals("Drink") && event.getMenuTarget().contains("Super restore") || event.getMenuTarget().contains("Tears of elidinis")) {
-			restoreCounter++;
-			brewCounter -= 3; // Reset 3 sips of Saradomin brews for each sip of Super restore
-			if (brewCounter < 0) {
-				brewCounter = 0;
-			}
+		if (drankRestoreOrTears(event)) {
+			drinkRestore();
 		}
-		int requiredRestores = (int) Math.floor((double) brewCounter / 3.0);
 	}
 
-//	public void onMenuOptionClicked(MenuOptionClicked event) {
-//		if (event.getMenuOption().equals("Drink") && event.getMenuTarget().contains("Saradomin brew")) {
-//			sipCount++;
-//		}
-//		if (event.getMenuOption().equals("Drink") && event.getMenuTarget().contains("Super restore")) {
-//			restoreCount++;
-//			sipCount -= 3; // Reset 3 sips of Saradomin brews for each sip of Super restore
-//			if (sipCount < 0) {
-//				sipCount = 0;
-//			}
-//		}
-//		int requiredRestores = (int) Math.floor((double) sipCount / 3.0);
-//		// Display `requiredRestores` on the screen as the restore amount.
-//	}
+	private boolean drankBrewOrNectar(MenuOptionClicked event) {
+		return event.getMenuOption().equals("Drink") && event.getMenuTarget().contains("Saradomin brew") || event.getMenuTarget().contains("Nectar");
+	}
 
-	@Provides
-	BrewTracker provideConfig(ConfigManager configManager)
-	{
-		return configManager.getConfig(BrewTracker.class);
+	private boolean drankRestoreOrTears(MenuOptionClicked event) {
+		return event.getMenuOption().equals("Drink") && event.getMenuTarget().contains("Super restore") || event.getMenuTarget().contains("Tears of elidinis");
+	}
+
+	private void drinkBrew() {
+		brewCounter++;
+	}
+
+	private void drinkRestore() {
+		brewCounter -= brewsPerRestore;
+		if (brewCounter < 0) { // Never allow us to go below 0
+			brewCounter = 0;
+		}
 	}
 }
