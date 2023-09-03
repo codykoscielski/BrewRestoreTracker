@@ -1,4 +1,4 @@
-package com.example;
+package com.BrewTracker;
 
 import net.runelite.client.ui.overlay.Overlay;
 import org.slf4j.Logger;

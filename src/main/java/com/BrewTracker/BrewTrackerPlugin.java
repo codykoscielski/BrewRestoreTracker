@@ -1,4 +1,4 @@
-package com.example;
+package com.BrewTracker;
 
 import javax.inject.Inject;
 
