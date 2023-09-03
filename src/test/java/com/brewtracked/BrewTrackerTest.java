@@ -1,4 +1,4 @@
-package com.BrewTracker;
+package com.brewtracked;
 
 import net.runelite.client.RuneLite;
 import net.runelite.client.externalplugins.ExternalPluginManager;
