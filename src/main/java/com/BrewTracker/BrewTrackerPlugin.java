@@ -10,8 +10,8 @@ import net.runelite.client.ui.overlay.OverlayManager;
 
 @PluginDescriptor(
 	name = "Brew Tracker",
-	description = "Tracks the number of Sara brew sips",
-	tags = {"sara", "brew", "tracker"}
+	description = "Keeps track of the number of brew sips you have taken to know when to restore",
+	tags = {"sara", "brew", "tracker", "saradmon brew"}
 )
 public class BrewTrackerPlugin extends Plugin
 {
