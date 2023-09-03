@@ -1,4 +1,4 @@
-package com.brewtracked;
+package com.brewtracker;
 
 import javax.inject.Inject;
 
