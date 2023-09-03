@@ -4,7 +4,7 @@ import net.runelite.client.RuneLite;
 import net.runelite.client.externalplugins.ExternalPluginManager;
 import net.runelite.client.plugins.Plugin;
 
-public class ExamplePluginTest
+public class BrewTrackerTest
 {
 	public static void main(String[] args) throws Exception
 	{
